@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WORD FINDER · Kamus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: #000000;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .card {
+            background: #111111;
+            border-radius: 2.2rem;
+            padding: 2rem 2rem 2.5rem;
+            border: 1px solid #2a2a2a;
+            box-shadow: 0 25px 45px -12px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.02) inset;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .title h1 {
+            color: #ffffff;
+            font-size: 2.2rem;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        .title p {
+            color: #7e7e7e;
+            font-size: 0.9rem;
+            margin-top: 0.2rem;
+            font-weight: 300;
+        }
+
+        .stats-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            background: #1a1a1a;
+            border-radius: 3rem;
+            padding: 0.6rem 1.5rem;
+            border: 1px solid #2e2e2e;
+        }
+
+        .total-kata {
+            color: #ffffff;
+            font-weight: 500;
+            background: #2a2a2a;
+            padding: 0.3rem 1.2rem;
+            border-radius: 2rem;
+            font-size: 0.95rem;
+            border: 1px solid #4a4a4a;
+        }
+
+        .credit {
+            color: #b5b5b5;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .credit a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 500;
+            background: #2d2d2d;
+            padding: 0.2rem 1rem;
+            border-radius: 2rem;
+            border: 1px solid #4a4a4a;
+            transition: 0.15s;
+        }
+
+        .credit a:hover {
+            background: #3d3d3d;
+            border-color: #777;
+        }
+
+        .theme-switch {
+            background: #1d1d1d;
+            border-radius: 40px;
+            padding: 0.3rem;
+            border: 1px solid #333;
+            display: flex;
+            gap: 0.2rem;
+        }
+
+        .theme-option {
+            background: transparent;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #aaa;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .theme-option.active {
+            background: #ffffff;
+            color: #000000;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(255,255,255,0.2);
+        }
+
+        .search-area {
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            background: #1a1a1a;
+            border-radius: 60px;
+            border: 1px solid #2e2e2e;
+            padding: 0.2rem 0.2rem 0.2rem 1.8rem;
+            transition: 0.15s;
+        }
+
+        .input-group:focus-within {
+            border-color: #777;
+            background: #202020;
+        }
+
+        .input-group input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 1rem 0.5rem 1rem 0;
+            font-size: 1.2rem;
+            color: #ffffff;
+            outline: none;
+        }
+
+        .input-group input::placeholder {
+            color: #555;
+            font-weight: 300;
+            font-size: 1rem;
+        }
+
+        .input-group button {
+            background: #ffffff;
+            border: none;
+            border-radius: 60px;
+            padding: 0.9rem 2.2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #000000;
+            cursor: pointer;
+            transition: 0.15s;
+            white-space: nowrap;
+            border: 1px solid transparent;
+        }
+
+        .input-group button:hover {
+            background: #e0e0e0;
+            transform: scale(0.98);
+        }
+
+        .loading-container {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            margin: 1rem 0 0.5rem 0;
+            color: #b5b5b5;
+            font-weight: 400;
+            padding-left: 0.3rem;
+        }
+
+        .loader {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #3a3a3a;
+            border-top: 2px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .result-section {
+            margin-top: 2rem;
+            border-top: 1px solid #2a2a2a;
+            padding-top: 1.8rem;
+        }
+
+        .list-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .list-header h3 {
+            color: #dddddd;
+            font-weight: 400;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge {
+            background: #232323;
+            color: #b0b0b0;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            border: 1px solid #3a3a3a;
+        }
+
+        .btn-research {
+            background: transparent;
+            border: 1px solid #4a4a4a;
+            padding: 0.6rem 1.8rem;
+            border-radius: 40px;
+            font-weight: 500;
+            color: #dddddd;
+            cursor: pointer;
+            transition: 0.15s;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .btn-research:hover {
+            background: #2a2a2a;
+            color: #ffffff;
+            border-color: #777;
+        }
+
+        .word-list {
+            list-style: none;
+            background: #0c0c0c;
+            border-radius: 1.8rem;
+            padding: 1.8rem 2rem;
+            max-height: 380px;
+            overflow-y: auto;
+            border: 1px solid #2a2a2a;
+            margin-bottom: 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: #555 #1a1a1a;
+        }
+
+        .word-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .word-list::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 10px;
+        }
+        .word-list::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 10px;
+        }
+
+        .word-list li {
+            color: #eaeaea;
+            padding: 0.7rem 0.5rem;
+            border-bottom: 1px solid #262626;
+            font-size: 1.1rem;
+            font-weight: 300;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .word-list li::before {
+            content: counter(item) ". ";
+            counter-increment: item;
+            color: #888;
+            font-weight: 400;
+            min-width: 2.5rem;
+        }
+
+        .word-list {
+            counter-reset: item;
+        }
+
+        .word-list li:last-child {
+            border-bottom: none;
+        }
+
+        body.white-theme {
+            background: #f0f0f0;
+        }
+        body.white-theme .card {
+            background: #ffffff;
+            border-color: #d0d0d0;
+            box-shadow: 0 20px 35px -8px rgba(0,0,0,0.15);
+        }
+        body.white-theme .title h1 {
+            color: #111111;
+        }
+        body.white-theme .title p {
+            color: #555;
+        }
+        body.white-theme .stats-row {
+            background: #e9e9e9;
+            border-color: #ccc;
+        }
+        body.white-theme .total-kata {
+            background: #dddddd;
+            color: #222;
+            border-color: #aaa;
+        }
+        body.white-theme .credit {
+            color: #444;
+        }
+        body.white-theme .credit a {
+            background: #e0e0e0;
+            color: #111;
+            border-color: #aaa;
+        }
+        body.white-theme .input-group {
+            background: #f2f2f2;
+            border-color: #ccc;
+        }
+        body.white-theme .input-group input {
+            color: #111;
+        }
+        body.white-theme .input-group input::placeholder {
+            color: #aaa;
+        }
+        body.white-theme .input-group button {
+            background: #111;
+            color: #ffffff;
+        }
+        body.white-theme .input-group button:hover {
+            background: #2a2a2a;
+        }
+        body.white-theme .loader {
+            border: 2px solid #bbb;
+            border-top: 2px solid #222;
+        }
+        body.white-theme .loading-container {
+            color: #444;
+        }
+        body.white-theme .list-header h3 {
+            color: #333;
+        }
+        body.white-theme .badge {
+            background: #ececec;
+            border-color: #aaa;
+            color: #333;
+        }
+        body.white-theme .btn-research {
+            border-color: #aaa;
+            color: #333;
+        }
+        body.white-theme .btn-research:hover {
+            background: #dddddd;
+            color: #000;
+        }
+        body.white-theme .word-list {
+            background: #f9f9f9;
+            border-color: #ccc;
+        }
+        body.white-theme .word-list li {
+            color: #222;
+            border-bottom-color: #d0d0d0;
+        }
+        body.white-theme .word-list li::before {
+            color: #777;
+        }
+        body.white-theme .theme-option.active {
+            background: #111;
+            color: white;
+            box-shadow: none;
+        }
+        body.white-theme .theme-option {
+            color: #666;
+        }
+        body.white-theme .theme-switch {
+            background: #e6e6e6;
+            border-color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <div class="title">
+                    <h1>WORD FINDER</h1>
+                    <p>kamus super lengkap · ribuan kata</p>
+                </div>
+                <div class="theme-switch">
+                    <button class="theme-option active" id="theme-dark">Hitam</button>
+                    <button class="theme-option" id="theme-light">Putih</button>
+                </div>
+            </div>
+
+            <div class="stats-row">
+                <span class="total-kata" id="totalKataDisplay">Total Kata: 0</span>
+                <span class="credit">
+                    <span>Web Dibuat:</span>
+                    <a href="https://tiktok.com/@dinooodev" target="_blank">📱 @dinooodev</a>
+                </span>
+            </div>
+
+            <div class="search-area">
+                <div class="input-group">
+                    <input type="text" id="awalanInput" placeholder="Masukkan awalan kata, contoh: A, B, me, x..." autocomplete="off">
+                    <button id="searchBtn">Search</button>
+                </div>
+                <div id="loadingAnim" class="loading-container hidden">
+                    <div class="loader"></div>
+                    <span>MENCARI KATA ...</span>
+                </div>
+            </div>
+
+            <div class="result-section" id="resultSection">
+                <div class="list-header">
+                    <h3 id="listTitle">LIST KATA🔎 :</h3>
+                    <span class="badge" id="countBadge">0 kata</span>
+                </div>
+
+                <div id="wordListContainer">
+                    <ul class="word-list" id="wordList">
+                        <li style="justify-content: center; color:#777; list-style:none; counter-increment: none;">✨ masukkan awalan</li>
+                    </ul>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; margin-top: 1.2rem;">
+                    <button class="btn-research" id="researchBtn">
+                        <span>⟲</span> ReSearch · Cari Lain
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ==================== DATABASE SUPER LENGKAP (1 BARIS - TANPA ENTER) ====================
+            const wordDatabase = ["Abrasi","Absorpsi","Absurd","Ada","Adil","Adhesi","Adiabatik","Adopsi","Adsorpsi","Aerob","Aerodinamika","Aeronomi","Afeksi","Afiks","Agama","Ahli","Ahad","Aha","Agen","Agregat","Agronomi","Aksi","Aksioma","Aktif","Aktinium","Aktual","Akumulasi","Akurasi","Akustik","Alam","Alas","Alat","Albar","Algoritma","Aliran","Alkali","Alkimia","Alkohol","Almamater","Alpukat","Altruisme","Aluminium","Amal","Aman","Amanah","Ambar","Ambigu","Ambruk","Amiable","Amilum","Amino","Amfibi","Amplitudo","Analisis","Analog","Anarki","Anatomi","Anda","Anemia","Anergi","Angin","Angka","Angkasa","Anil","Animasi","Anjing","Anoda","Anomali","Anorganik","Antagonis","Antariksa","Antarmuka","Antre","Antropologi","Anu","Anugerah","Aorta","Apatis","Api","Aplikasi","Apotik","April","Apsintus","Arang","Arca","Ardi","Area","Arena","Arsitek","Arsitektur","Artefak","Artikel","Arti","Arus","Aruh","Asa","Asal","Asam","Asasi","Aset","Asetilena","Asfiksi","Asimilasi","Asisten","Askariasis","Aspal","Asparagus","Aspek","Aspirasi","Asri","Aster","Asteroid","Astrofisika","Astrologi","Astronaut","Astronomi","Astra","Atap","Atas","Atlet","Atmosfer","Atom","Atsiri","Audit","Aula","Aurora","Autisme","Auto","Autopsi","Avokad","Awan","Ayam","Ayah","Ayo","Azab","Azas","Azimut","Baca","Badan","Bagus","Bahagia","Bahasa","Bahu","Bakteri","Bakteriofag","Bakti","Balon","Bambu","Bandara","Bangku","Banjir","Bantal","Bapak","Barometer","Baru","Baryon","Batas","Baterai","Batu","Bawah","Bayi","Bayar","Bayangan","Bazoka","Bebas","Beda","Beku","Belajar","Beli","Benda","Bening","Bensin","Beras","Berat","Bergerak","Berkah","Bersih","Besaran","Besok","Beta","Beton","Biar","Bias","Biasa","Biji","Bilik","Bilangan","Bimasakti","Bintang","Biogenesis","Biografi","Biokimia","Biologi","Bioma","Biopsi","Biosfer","Bioteknologi","Biotin","Bisnis","Bocah","Bohlam","Bohr","Bola","Bonsai","Bosan","Botani","Botol","Buat","Buka","Buku","Bumi","Bunga","Bunyi","Buruh","Bus","Cabe","Cacat","Cahaya","Cakap","Cakram","Cakrawala","Camat","Camilan","Campur","Canda","Canggih","Cangkir","Cantik","Capai","Capek","Cara","Cari","Cegah","Cek","Celah","Celsius","Cepat","Cermin","Cetak","Cicip","Cincin","Cinta","Ciri","Cita","Citra","Comel","Coklat","Cukup","Cuma","Cuaca","Cuci","Cukai","Cultur","Cuping","Dada","Dagang","Dagu","Dalam","Damai","Danau","Dapat","Dapur","Darah","Dasi","Data","Daya","Debit","Dedek","Definisi","Degradasi","Dekade","Dekan","Dekat","Dekokta","Dekorasi","Delapan","Delta","Demam","Demi","Demografi","Demonstrasi","Dendam","Dendeng","Dendrit","Dengan","Dengar","Dengki","Dengung","Denominasi","Densitas","Denting","Depan","Depresi","Deputi","Dera","Derai","Derajat","Deral","Deram","Derang","Derap","Deras","Derau","Deregu","Derek","Deret","Derik","Dering","Derma","Dermaga","Dermawan","Dermoid","Dero","Deru","Desa","Desain","Desak","Desas-desus","Deselerasi","Desember","Desersi","Desibel","Desiderata","Desig","Desikator","Desimal","Desinfektan","Desing","Desir","Desis","Deskripsi","Desorpsi","Despot","Destinasi","Destruksi","Detail","Detak","Detap","Deteksi","Detergen","Determinan","Determinasi","Detik","Detonasi","Detritus","Detus","Deuterium","Devaluasi","Dewa","Dewan","Dewasa","Dewi","Di","Diabetes","Diadem","Diagnosis","Diagram","Diakritik","Dialek","Dialektika","Dialog","Diam","Diameter","Diafragma","Diagenesis","Diagnostik","Diagonal","Diaken","Diakon","Diakones","Diakronik","Dial","Dialah","Dialektik","Dialektis","Dialel","Dialisis","Dialogis","Diamagnetisme","Diamati","Diametrik","Diamkan","Dian","Diang","Diangkut","Dianjurkan","Dianta","Diantara","Diantarai","Diantau","Diantologi","Diapause","Diapedesis","Diaper","Diapositif","Diari","Dias","Diasistem","Diaspora","Diat","Diatermi","Diatesis","Diatom","Diatomit","Diatonik","Diatopik","Diawetkan","Dibaca","Dibagi","Dibakar","Dibalas","Dibalsam","Dibanding","Dibandingkan","Dibangun","Dibantu","Dibantut","Dibasuh","Dibata","Dibatasi","Dibawa","Dibayangi","Dibayar","Dibekukan","Dibelakang","Dibelokkan","Diberi","Diberikan","Dibiarkan","Dibina","Dibius","Diblokir","Dibor","Dibubarkan","Dibuat","Dibuka","Dibuktikan","Dibungkus","Dibunuh","Dicegah","Dicek","Dicelup","Dicerna","Dicicip","Dicoba","Dicuci","Didapat","Didarat","Didengar","Didiamkan","Didik","Didikan","Didinginkan","Diduga","Die","Dieja","Dielusi","Diencerkan","Dienkapsulasi","Dientalkan","Dievaluasi","Dievakuasi","Difabel","Difase","Diferensial","Diferensiasi","Difraksi","Difusi","Digabung","Diganti","Digarap","Digarisbawahi","Digdaya","Digesti","Digit","Digital","Digitalin","Digitalis","Dignitas","Digraf","Digresi","Dihargai","Dihiasi","Dihidrogen","Dihitung","Dijaga","Dijajah","Dijual","Dikaji","Dikalahkan","Dikaruniai","Dikasihi","Dikau","Dikecam","Dikejar","Dikemas","Dikenal","Dikepung","Dikerjakan","Diketahui","Dikhianati","Dikira","Dikirim","Dikotil","Dikotomi","Dikristalkan","Diksi","Diksinasi","Diktat","Diktator","Dikte","Diktum","Dikukus","Dikumpulkan","Dikunci","Dilabeli","Dilacak","Dilafalkan","Dilambangkan","Dilanda","Dilanggar","Dilapisi","Dilarang","Dilatih","Dilatasi","Dilaunching","Dilema","Dilembagakan","Dilempar","Dilengkapi","Dilesap","Dilewatkan","Dilihat","Dilipat","Diliputi","Dilokalisasi","Diluar","Dimaksud","Dimakan","Dimampatkan","Dimandikan","Dimangsa","Dimanja","Dimanfaatkan","Dimasak","Dimasukkan","Dimatikan","Dimediasi","Dimekarkan","Dimensi","Dimer","Dimetri","Dimiliki","Diminum","Dimodifikasi","Dimoneter","Dimorfisme","Dimulai","Dimuntahkan","Dimurnikan","Dinaikkan","Dinamik","Dinamika","Dinamit","Dinamo","Dinamometer","Dinar","Dinasti","Dinding","Dingin","Dini","Dinilai","Dinodai","Dinokardium","Dinosaurus","Diode","Diolah","Dionisasi","Diop","Dioptase","Dioptri","Diorama","Diorit","Dioses","Dip","Dipacu","Dipadamkan","Dipadati","Dipadatkan","Dipadukan","Dipagar","Dipahami","Dipajang","Dipakaikan","Dipaksa","Dipalu","Dipamerkan","Dipan","Dipandang","Dipandu","Dipaneni","Dipanggang","Dipengaruhi","Dipenjara","Dipensiunkan","Dipentas","Diper","Diperas","Dipercaya","Diperdebatkan","Diperiksa","Diperlakukan","Diperlukan","Dipesan","Dipetakan","Dipidana","Dipilih","Dipinang","Dipinjam","Dipisah","Dipol","Dipolakan","Dipolisikan","Dipolitisasi","Dipondasi","Dipopulerkan","Diproses","Diproteksi","Dipublikasi","Dipuja","Dipukul","Dipunahkan","Diputar","Diracik","Diragukan","Dirahasiakan","Diramal","Diramu","Dirancang","Dirangkap","Diratakan","Diratifikasi","Direbus","Diregangkan","Direkam","Direkatkan","Direkayasa","Direktur","Direm","Diremehkan","Direndam","Direndeng","Direnovasi","Direntangkan","Direp","Direpotkan","Direstui","Dirgahayu","Dirgantara","Dirigen","Diringkas","Dirusak","Dirut","Disaat","Disablon","Disadap","Disain","Disakarida","Disalahartikan","Disalurkan","Disambung","Disampaikan","Disampul","Disangka","Disapih","Disaring","Disarung","Disaster","Disatukan","Disbetes","Disdiplasi","Disebabkan","Disediakan","Disegel","Diseimbangkan","Disekat","Disekop","Disel","Diselamatkan","Diseleksi","Diselingi","Diselubungi","Disember","Disemprot","Disensor","Diseok","Disepelekan","Disepuh","Disesal","Disesuaikan","Disetir","Disetujui","Disetv","Disfungsi","Disibak","Disikat","Disimpan","Disinfektan","Disinformasi","Disinggung","Disingkap","Disini","Disintegrasi","Disiplin","Disisi","Disisipkan","Disita","Disjungsi","Disjungtif","Disko","Diskoid","Diskon","Diskontinu","Diskordans","Diskotek","Diskredit","Diskrepansi","Diskresi","Diskriminasi","Diskriminan","Diskriminatif","Diskualifikasi","Diskulpasi","Diskursus","Diskusi","Dislokasi","Dismembrasio","Dismenorea","Disimilasi","Disimpangkan","Disinfektan","Disinformasi","Disinsentif","Disintegrasi","Disiplin","Disjoki","Disjungsi","Disjungtif","Disk","Diska","Diskala","Diskalkulia","Diskantus","Diskarifikasi","Diskaun","Diskerjakan","Disket","Disfagia","Disfasia","Disfemisme","Disfonia","Disfungsi","Disgerminoma","Disglikemia","Disgrafia","Disihir","Disinfektan","Disinformasi","Disinsentif","Disintegrasi","Disiplin","Disjoki","Disjungsi","Disjungtif","Disk","Diskala","Diskalkulia","Diskantus","Diskarifikasi","Diskon","Diskontinu","Diskordans","Diskotek","Diskredit","Diskrepansi","Diskresi","Diskriminasi","Diskriminan","Diskriminatif","Diskualifikasi","Diskulpasi","Diskursus","Diskusi","Dislipidemia","Dislokasi","Dismembrasio","Dismenorea","Disimilasi","Disomia","Disorder","Disorganisasi","Disorientasi","Disosiasi","Dispareunia","Disparitas","Dispensasi","Dispenser","Dispepsia","Displasia","Displasi","Disponibel","Disposisi","Disprosium","Distabilitas","Distal","Distansia","Distensi","Distilasi","Distilator","Distingsi","Distingtif","Distoma","Distorsi","Distosia","Distribusi","Distributor","Distrik","Distungsi","Disuapi","Disubordinasikan","Disudahi","Disukai","Disumbang","Disunat","Disusul","Disusun","Ditabrak","Ditabuh","Ditahan","Ditahbis","Ditambah","Ditambang","Ditambat","Ditampik","Ditandai","Ditandatangani","Ditangani","Ditanggap","Ditanggal","Ditanya","Ditapis","Ditarget","Ditata","Ditawar","Ditebak","Ditebang","Ditebar","Ditegakkan","Ditegaskan","Ditekan","Ditekuk","Ditelan","Diteliti","Ditempa","Ditempatkan","Ditemukan","Ditenun","Ditenung","Diteorikan","Ditepis","Ditepuk","Diterbangkan","Diterima","Diterjang","Diterjemahkan","Diterjunkan","Dites","Ditikam","Ditinjau","Ditipu","Ditiup","Dito","Ditodong","Ditoleransi","Ditombak","Ditopang","Ditorpedo","Ditransfer","Ditransplantasi","Ditransposisi","Dituai","Dituang","Ditubruk","Ditugasi","Ditulis","Ditumbuhkan","Ditumpahkan","Ditumpuk","Ditunaikan","Ditunjang","Ditunjukkan","Dituntun","Ditutup","Diuji","Diukir","Diukur","Diulang","Diulas","Diulur","Diumpan","Diumpankan","Diumumkan","Diungkap","Diungsikan","Diuniversalkan","Diupacarai","Diupayakan","Diurusi","Diusahakan","Diusik","Diusir","Diusulkan","Diutamakan","Divagasi","Divaksin","Divergen","Divergensi","Diversifikasi","Diversitas","Divestasi","Diving","Divisi","Divisibilitas","Divo","Divor","Divorium","Diwajibkan","Diwakili","Diwarnai","Diwawancara","Diwiwaha","Diwujudkan","Diyakini","Diyurit","Dobel","Dobi","Dodol","Dodong","Dodos","Dof","Dog","Dogel","Dogeng","Dogma","Dogmatik","Dogmatis","Dohok","Dok","Dokar","Doko","Dokoh","Doksologi","Dokter","Doktor","Doktorandus","Doktrin","Doku","Dokumen","Dokumentasi","Dol","Dolan","Dolar","Doldrum","Dolfin","Dolim","Dolmen","Dolomit","Dom","Domain","Domba","Domblong","Domein","Domestik","Domestikasi","Dominan","Dominasi","Dominatris","Domine","Dominion","Domino","Domisili","Domot","Dompak","Dompet","Domplang","Dompleng","Dompol","Don","Donan","Donat","Donatur","Doncang","Dondang","Donder","Dondom","Dong","Dongak","Dongeng","Dongkel","Dongkok","Dongkol","Dongkrak","Dongpan","Dongpok","Donor","Donta","Dop","Dopis","Dor","Dorbi","Dorf","Dorman","Dormansi","Dorna","Dorong","Dorsal","Dorslah","Dorsopalatal","Dorsovelar","Dorsum","DorTik","Dos","Dosa","Dosados","Dosir","Dosis","Dot","Dowel","Dower","Down","Downgrade","Download","Doyak","Doyan","Draf","Dragon","Drai","Drainase","Drakula","Dram","Drama","Dramatik","Dramatis","Dramaturgi","Dramawan","Draperi","Drastis","Drat","Drel","Dren","Dresi","Dresir","Dril","Droi","Dropsi","Drs","Drt","Dua","Duabelas","Duad","Duadenium","Duadesimal","Duae","Dual","Dualis","Dualisme","Dualistis","Duan","Duang","Duapuluh","Duaria","Dubbing","Duble","Dublet","Dublir","Dublin","Dubuk","Dubur","Duda","Duduk","Dudur","Dudus","Duel","Duet","Duf","Dug","Dugal","Dugang","Dugas","Dugderan","Duit","Dujah","Duk","Duka","Dukacita","Dukan","Dukat","Dukaten","Dukcapil","Dukhan","Dukos","Duku","Dukuh","Dukun","Dukungan","Dukungan","Dula","Dulag","Dulang","Duli","Dulur","Dum","Dumah","Dumdum","Dumel","Dumung","Dunah","Dunia","Duniawi","Dunsanak","Duodesimal","Duodrama","Duopoli","Dupleks","Duplik","Duplikasi","Duplikat","Duplikator","Duplisitas","Dupra","Dur","Dura","Durasi","Duratif","Duren","Dures","Durhaka","Durhaka","Duri","Durian","Durias","Duriat","Durian","Durik","Durlak","Durna","Durno","Duro","Duru","Duruwik","Dus","Dusin","Dusta","Dustur","Dusun","Duta","Duuman","Duwet","Duyung","Ebi","Ebola","Ebonit","Ebook","Ebudaya","Ecer","Eco","Eda","Edefis","Edema","Eden","Edentat","Edisi","Edit","Editor","Edukasi","Ef","Efektif","Efektivitas","Efektor","Efisien","Efisiensi","Efor","Eforia","Ega","Egal","Egalitarian","Egaliter","Egang","Ego","Egosentris","Egoisme","Egoistis","Egrang","Egresi","Ehe","Eidetik","Eigendom","Eikosan","Einsteinium","Eisen","Ejakulasi","Ejaan","Ejektor","Eji","Ekabahasa","Ekabahasawan","Ekad","Ekadasha","Ekakaki","Ekakala","Ekamatra","Ekana","Ekaprasetya","Ekasarjana","Ekasila","Ekasuku","Ekatalog","Ekawarna","Eka","Ekbal","Ekdosis","Ekin","Ekliptika","Eklips","Eklosi","Eko","Ekofisiologi","Ekofraksia","Ekogeografi","Ekografer","Ekografi","Ekogrfis","Ekoklimat","Ekoklimatologi","Ekokronologi","Ekologi","Ekologis","Ekonom","Ekonomi","Ekonomis","Ekosfer","Ekosistem","Ekosistematika","Ekospesies","Ekostratigrafi","Ekotipe","Ekotipe","Ekotipifikasi","Ekotoksikologi","Ekoturisme","Ekran","Ekrin","Ekrinologi","Eks","Eksak","Eksakta","Eksaltasi","Eksam","Eksamen","Eksaminasi","Eksaminator","Eksantem","Eksantropus","Eksarasi","Eksase","Eksaserbasi","Ekses","Eksesif","Eksfoliasi","Ekshalasi","Ekshibisi","Ekshibisionis","Ekshibisionisme","Ekshibitum","Eksikator","Eksim","Eksipien","Eksisi","Eksistensi","Eksistensialis","Eksistensialisme","Eksit","Eksitasi","Ekskavasi","Ekskavator","Eksklave","Eksklusif","Eksklusivisme","Ekskomunikasi","Eskresi","Ekskreta","Ekskursi","Ekskursif","Eksodus","Eksofora","Eksoftalmia","Eksoftalmos","Eksoftalmus","Eksogami","Eksogen","Eksogin","Eksogini","Eksoisogami","Eksordium","Eksorsme","Eksosfer","Eksospora","Eksostosis","Eksoterik","Eksotermik","Eksotik","Eksotis","Eksotisme","Ekspansi","Ekspansif","Ekspansionis","Ekspansionisme","Ekspatriat","Ekspatriasi","Ekspedisi","Ekspeditor","Ekspeditur","Ekspektoran","Eksper","Eksperimen","Eksperimental","Ekspirasi","Eksplan","Eksplikasi","Eksplisit","Eksploit","Eksploitasi","Eksplorasi","Eksplorator","Eksplosi","Eksplosif","Ekspo","Eksponen","Eksponensial","Ekspor","Eksportir","Ekspos","Ekspose","Eksposisi","Ekspres","Ekspresi","Ekspresif","Ekspresionisme","Ekspresivitas","Ekspulsi","Ekspulsi","Ekstase","Ekstasi","Ekstensi","Ekstensif","Ekstensifikasi","Ekstensor","Eksterior","Eksteritorial","Ekstern","Eksternal","Ekstra","Ekstradivisi","Ekstradisi","Ekstrak","Ekstrakardiak","Ekstraksi","Ekstrakurikuler","Ekstralinguistis","Ekstramarital","Ekstranei","Ekstraparlementer","Ekstrapolasi","Ekstraseluler","Ekstraterestrial","Ekstrateritorial","Ekstrauterin","Ekstraversi","Ekstrem","Ekstremis","Ekstremisme","Ekstremitas","Ekstrik","Ekstrinsik","Eksudat","Eksudasi","Eksul","Eksuvia","Fabel","Fabrikasi","Faden","Fadil","Faeces","Fafa","Fag","Fagosit","Fagositosis","Fagot","Fahrenheit","Fajar","Fakih","Fakir","Faks","Faksi","Faksimile","Fakta","Faktis","Faktor","Faktual","Fakultas","Fakultatif","Fakultas","Fal","Falah","Falak","Falaj","Falsafah","Falsafi","Faluns","Fam","Famili","Familia","Familiar","Familus","Fana","Fanat","Fanatik","Fanatisisme","Fanatism","Fandango","Fandom","Fanel","Fang","Fani","Fantasi","Fantastis","Fantom","Farad","Faram","Fardu","Farik","Faring","Faringal","Faringalisasi","Farmakodinamika","Farmakokinetika","Farmakologi","Farmakologis","Farmakope","Farmakoterapi","Farmakotoksikologi","Farmasi","Fars","Farsakh","Farsial","Farsian","Farsi","Farthing","Fasad","Fasal","Fasakh","Fasd","Fase","Fasel","Fasia","Fasid","Fasih","Fasik","Fasilitas","Fasilitator","Fasis","Fasisme","Fatah","Fatal","Fatala","Fatalis","Fatalisme","Fatalitas","Fatan","Fatang","Fatihah","Fatir","Fatom","Fatometer","Fatamorgana","Fatometer","Fatoni","Fatri","Fatsun","Fattah","Fatur","Fatum","Faturrahman","Fatwa","Fauna","Favorit","Favoritisme","Fawatih","Fawatihus","Fawatihus Suwar","Fawatihus Suwar","Faya","Fayakun","Fayung","Feblik","Febrin","Februari","Federasi","Federatif","Fef","Fefer","Feferen","Feferen","Fek","Fekal","Fekundasi","Fekunditas","Fela","Felon","Felon","Fels","Felsit","Felsitik","Felt","Felt","Femina","Feminin","Femininitas","Feminisme","Feminis","Femoral","Fenakit","Fenantren","Fenakit","Fend","Fenestra","Fenestrasi","Fenetik","Fenil","Fenilalanina","Fenobarbital","Fenokristal","Fenol","Fenologi","Fenomena","Fenomenal","Fenomenalisme","Fenomenologi","Fenotipe","Fenotipik","Fens","Fenta","Fentanil","Fentolamin","Feodal","Feodalisme","Feodalistis","Fer","Fera","Ferak","Feroksida","Feroksida","Feromagnetik","Feromagnetisme","Feromon","Feromongan","Ferronikel","Ferrum","Fertil","Fertilisasi","Fertilitas","Fertilitas","Fertilitas","Ferum","Feses","Fesyen","Fetal","Fetis","Fetor","Fetus","Ff","Fi","Fiat","Fiber","Fibrasi","Fibril","Fibrilasi","Fibrin","Fibrinogen","Fibrinolisis","Fibrinolitik","Fibroblas","Fibroid","Fibroin","Fibroma","Fibrosis","Fibrositis","Fikih","Fikli","Fikologi","Fikrah","Fiksasi","Fiksi","Fiktif","Fiktis","Fikus","Fikus","Filamen","Filamen","Filantrop","Filantropi","Filantropis","Filaria","Filariasis","Filateli","Filatelik","Filatelis","Filharmoni","Filial","Filibuster","Film","Filmis","Filo","Filodendron","Filogenesis","Filogeni","Filogenik","Filoksera","Filolog","Filologi","Filologis","Filosof","Filosofi","Filosofis","Filsafat","Filsuf","Filtrasi","Filum","Final","Finalis","Finalisasi","Finansial","Finir","Finis","Fintech","Fiolaks","Fir","Firaun","Firdaus","Firdausi","Firma","Firman","Firman","Firman","Firn","Fisabilitas","Fisibel","Fisik","Fisika","Fisikawan","Fisiognomi","Fisiognomis","Fisiologi","Fisiologis","Fisioterapi","Fisis","Fiskal","Fistula","Fitur","Fiuh","Flora","Fobia","Fokus","Formal","Fosil","Foto","Fotokopi","Fragmen","Frekuensi","Fungsi","Gaun","Gadget","Gagah","Gagal","Gagasan","Gajah","Galaksi","Gambar","Gamis","Gampang","Ganas","Ganti","Garansi","Garis","Gas","Gaya","Gelap","Gelas","Gembira","Gemuk","Generasi","Genteng","Geografi","Gerak","Gigih","Gizi","Grafik","Gula","Gunung","Habis","Hadiah","Hafal","Hentai","Hak","Halus","Hamba","Hampir","Handal","Hangat","Hanya","Haram","Harga","Hari","Helix","Harmoni","Harta","Hasil","Haus","Hebat","Hewan","Hias","Hidup","Hijau","Hikmah","Hilang","Hitung","Hobi","Hormat","Hotel","Hubung","Hujan","Hukum","Hulu","Ibu","Ide","Ideal","Identik","Idola","Ijazah","Ikhlas","Ikon","Ilmu","Imajinasi","Imam","Iman","Imbas","Imigrasi","Imun","Indah","Individu","Industri","Infeksi","Info","Ingat","Inggris","Inisiatif","Injak","Inovasi","Insan","Iah","Inspirasi","Instan","Insting","Interaksi","Intro","Irit","Isi","Isu","Isyarat","Itu","Izin","Jabat","Jadi","Jaga","Jahit","Jajar","Jalan","Jamu","Janda","Jangka","Janji","Jarak","Jasa","Jasmani","Jati","Jatuh","Jawab","Jejak","Jelas","Jemput","Jendela","Jenis","Jeruk","Jiwa","Jodoh","Jogging","Jual","Jujur","Jumat","Jumlah","Juni","Jus","Kabar","Kabel","Kaca","Kadar","Kafe","Kaget","Kain","Kakak","Kaku","Kalah","Kalam","Kalkulator","Kamar","Kambing","Kamera","Kampung","Kamu","Kamus","Kanan","Kantor","Kapan","Karat","Karya","Kasih","Kata","Kawah","Kawasan","Kayu","Kecil","Kedai","Kelas","Keliling","Keluarga","Kemanusiaan","Kena","Kepala","Kerja","Kertas","Kesempatan","Kesimpulan","Ketua","Khas","Kian","Kiat","Kilo","Kinerja","Kipas","Kiri","Kita","Klaim","Klasik","Kode","Kolega","Kolom","Komik","Komputer","Kondisi","Konflik","Konsisten","Kontak","Kopi","Koran","Kota","Kotor","Kreatif","Krisis","Kuat","Kubus","Kue","Kuliah","Kultur","Kunci","Kuning","Kunjung","Kualitas","Laba","Label","Lacak","Lagu","Lahir","Lain","Laki","Laku","Lalu","Lama","Lampu","Lancar","Lanskap","Lapar","Laptop","Lari","Larut","Las","Laut","Lebah","Lebar","Lecet","Legenda","Leher","Lekas","Lelah","Lembaga","Lempar","Lengkap","Lensa","Lentur","Lepas","Lereng","Lestari","Letak","Liar","Libur","Lidah","Lilin","Lima","Limbah","Lincah","Lindas","Lingkung","Lini","Lintas","Lirik","Listrik","Literasi","Loak","Lobi","Lokal","Lomba","Lorong","Luar","Lubang","Lucu","Ludah","Lugas","Luka","Lulus","Lumayan","Lumut","Lunak","Lurus","Lusuh","Lutut","Maaf","Mabuk","Macam","Madu","Magang","Mahal","Mahasiswa","Main","Maju","Makalah","Makan","Makin","Makna","Malam","Mampu","Manajemen","Manfaat","Mangga","Manusia","Mapan","Maret","Masalah","Masih","Massa","Mata","Matang","Materi","Matriks","Media","Medis","Megah","Meja","Mekanik","Melayani","Memori","Mendung","Mentor","Menyala","Merah","Merek","Mesin","Mesra","Meter","Metode","Mewah","Miliki","Minat","Minggu","Minim","Minyak","Misi","Mobil","Modern","Moga","Mudah","Muka","Mulia","Multi","Mumi","Mumet","Mundur","Murah","Murni","Musik","Musim","Musuh","Nafas","Nafsu","Nalar","Nama","Nampak","Nanas","Nanti","Nasi","Naskah","Nasib","Natal","Navigasi","Negara","Ngewe","Negosiasi","Negeri","Netral","Ngantuk","Niat","Nilai","Nimbrung","Nipis","Nirwana","Niscaya","Noda","Nomor","Normal","Nostalgia","Nota","Novel","Nuansa","Nuklir","Numeral","Nurut","Nutrisi","Nyaman","Nyambung","Nyata","Nyawa","Nyeri","Oasis","Obesitas","Objek","Observasi","Obrol","Ocehan","Oke","Olah","Ombak","Omen","Omzet","Online","Opa","Operasi","Opini","Opsional","Optik","Optimis","Orang","Orbit","Orde","Organik","Orientasi","Orisinil","Orok","Oscar","Osiloskop","Osmosis","Otot","Oven","Oksigen","Pacar","Padat","Pagi","Paham","Pajak","Pakar","Panas","Pandai","Pangan","Pantas","Papan","Paras","Pasar","Pasca","Pasien","Pasir","Patah","Paten","Pekerja","Pelajar","Pemburu","Politik","Politisi","Politika","Pena","Pencarian","Pendek","Penelitian","Pengalaman","Penting","Penyakit","Perang","Perasaan","Periode","Perlu","Pertama","Perubahan","Pesawat","Pesta","Peta","Petir","Pikir","Pil","Pilih","Pintar","Pintu","Pionir","Piring","Pohon"," Politik","Positif","Praktis","Prasasti","PR","Produk","Profesi","Program","Proyek","Publik","Puas","Pulang","Pulsa","Punya","Qalam","Qari","Qasar","Qat","Quran","Raba","Racun","Raga","Ragu","Rahasia","Rahim","Raih","Raja","Rak","Rambut","Rancang","Rangga","Rapi","Rapor","Rasa","Rata","Rawan","Raya","Realitas","Rebus","Rekomendasi","Rekor","Rempah","Renang","Rencana","Rendah","Rentang","Repot","Resep","Resiko","Restu","Reuni","Revolusi","Riang","Ribut","Rindu","Riang","Ritme","Rokok","Rona","Rugi","Rumah","Rumus","Rupa","Rusak","Rutin","Sabar","Sabtu","Sadar","Sahabat","Saham","Sains","Sakti","Salah","Salam","Saling","Sama","Sampai","Sandal","Sangar","Sangat","Sapi","Sarana","Sastra","Satelit","Satu","Sehat","Sejarah","Sekali","Sekitar","Sekolah","Selalu","Selamat","Selasa","Selatan","Seleksi","Semangat","Sementara","Senang","Sentral","Senin","Senyum","Sepak","Sepatu","Sereal","Seri","Sertifikat","Sesuai","Siapa","Sibuk","Sifat","Sihir","Sikap","Sikat","Simpan","Sinar","Sini","Sintesis","Sipil","Sirip","Sistem","Situs","Siul","Skala","Sketsa","Skor","Smart","Santet","Sms","Soda","Sofa","Software","Sopir","Sore","Sorot","Setelah","Sosial","Soto","Spesial","Spirit","Sponsor","Stabil",",Santai","Stadion","Staf","Stamina","Standar","Stasiun","Statistik","Stiker","Stimulus","Stres","Struktur","Studio","Suara","Suasana","Sukses","Suluh","Sumber","Sumpah","Sunyi","Super","Surat","Susah","Susu","Syair","Syukur","Tabir","Tabloid","Tahan","Tahun","Tajam","Takut","Taman","Tambah","Tamu","Tanda","Tanggal","Tantangan","Tanya","Tapi","Tari","Tas","Tata","Tawa","Teh","Teknik","Teks","Telinga","Teliti","Teman","Tempat","Temu","Tenaga","Tenang","Tenda","Tengah","Tentang","Tepat","Tepi","Tepuk","Teras","Terbang","Terima","Terjun","Terkait","Terus","Tes","Tetap","Tiap","Tiba","Tidak","Tiga","Tikar","Tiket","Tim","Timbul","Timur","Tindak","Tinggal","Tinggi","Tinta","Tipis","Tiruan","Tisu","Titik","Toko","Tolong","Tombol","Topan","Topik","Total","Transisi","Tren","Tua","Tuhan","Tulang","Tulis","Tumbuh","Tunggu","Tuntas","Tutup","Ukir","Ukuran","Ulangan","Ulas","Ultah","Umat","Umpan","Umun","Umur","Unik","Universal","Universitas","Untung","Uraian","Urat","Urban","Urgen","Urip","Usaha","Usia","Usul","Utama","Utara","Utopia","Uzur","Vakansi","Vaksin","Valas","Valid","Value","Variasi","Vektor","Vendor","Ventilasi","Venus","Verdik","Versi","Vertikal","Veteran","Via","Video","Viral","Viril","Virtual","Visi","Visitor","Visual","Vitamin","Vokal","Volt","Volume","Vulkan","Wabah","Wacana","Wadah","Wajah","Wajar","Waktu","Wali","Wanita","Wangi","Warga","Warna","Warta","Wawasan","Wayang","Wejangan","Wibawa","Widya","Wifi","Wijen","Wijaya","Wilayah","Winaya","Wira","Wiraswasta","Wisata","Wisuda","Wiyata","Won","Wortel","Wujud","Xenon","Xenofobia","Xenia","Xilofon","XXNX","Xantat","Yakin","Yakni","Yanda","Yang","Yard","Yasan","Yasin","Yayasan","Yogya","Yoga","Yodium","Yudikatif","Yudisium","Yatim","Yuk","Yunior","Yupiter","Zaman","Zamrud","Zat","Zebra","Zeni","Zigot","Zikir","Zodiak","Zona","Zonasi","Zoo","Zoom",
+            
+            //added words 
+"Seksi","Santi","Oma","Sudi","Sudirman","Firman","Sukarno","Habibi","Sempak","Bogor","Jakarta","Windah","Caca","Sahur","Fase","Pot","Presiden","Ant","Ahido","Ati","Asu","Tolol","Kontol","Elemen","Xilem","Imperatif","Homofermentatif","Ksatria","Naif","Usir","Ulama","Usif","Radioaktif","Jadwal","Stuck","Stroke","Ria","Raya","Mantan","Pacar","Hamzah","Asing","Filter","Index","Addax","Abang","Xilografi","Xilofon","Xerofit","Xilem","Xenon","Xenofobia"];
+
+            // elemen DOM
+            const awalanInput = document.getElementById('awalanInput');
+            const searchBtn = document.getElementById('searchBtn');
+            const loadingAnim = document.getElementById('loadingAnim');
+            const wordListEl = document.getElementById('wordList');
+            const countBadge = document.getElementById('countBadge');
+            const listTitle = document.getElementById('listTitle');
+            const researchBtn = document.getElementById('researchBtn');
+            const totalKataDisplay = document.getElementById('totalKataDisplay');
+            const themeDark = document.getElementById('theme-dark');
+            const themeLight = document.getElementById('theme-light');
+            const body = document.body;
+
+            // Tampilkan total kata
+            totalKataDisplay.textContent = `Total Kata: ${wordDatabase.length.toLocaleString()}`;
+
+            function searchByPrefix(prefix) {
+                wordListEl.innerHTML = '';
+                
+                if (!prefix.trim()) {
+                    countBadge.textContent = '0 kata';
+                    wordListEl.innerHTML = '<li style="justify-content: center; color:#777; list-style:none; counter-increment: none;">⚠️ masukkan awalan</li>';
+                    return;
+                }
+
+                loadingAnim.classList.remove('hidden');
+                listTitle.textContent = `LIST KATA : awalan "${prefix.toUpperCase()}"`;
+
+                setTimeout(() => {
+                    const lowerPrefix = prefix.toLowerCase().trim();
+                    const filtered = wordDatabase.filter(word => 
+                        word.toLowerCase().startsWith(lowerPrefix)
+                    ).sort((a,b) => a.localeCompare(b));
+
+                    countBadge.textContent = filtered.length + ' kata';
+                    wordListEl.innerHTML = '';
+
+                    if (filtered.length === 0) {
+                        const emptyMsg = document.createElement('li');
+                        emptyMsg.textContent = `⛔ "${prefix}" tidak ditemukan di database`;
+                        emptyMsg.style.cssText = 'justify-content: center; list-style:none; color:#888; counter-increment: none;';
+                        wordListEl.appendChild(emptyMsg);
+                    } else {
+                        filtered.forEach(kata => {
+                            const li = document.createElement('li');
+                            li.textContent = kata;
+                            wordListEl.appendChild(li);
+                        });
+                    }
+
+                    loadingAnim.classList.add('hidden');
+                }, 500);
+            }
+
+            function performSearch() {
+                const prefix = awalanInput.value.trim();
+                searchByPrefix(prefix);
+            }
+
+            searchBtn.addEventListener('click', performSearch);
+            awalanInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') performSearch();
+            });
+
+            researchBtn.addEventListener('click', () => {
+                awalanInput.value = '';
+                awalanInput.focus();
+                wordListEl.innerHTML = '<li style="justify-content: center; color:#777; list-style:none; counter-increment: none;">✨ masukkan awalan</li>';
+                countBadge.textContent = '0 kata';
+                listTitle.textContent = 'LIST KATA🔎 :';
+                loadingAnim.classList.add('hidden');
+            });
+
+            themeDark.addEventListener('click', () => {
+                body.classList.remove('white-theme');
+                themeDark.classList.add('active');
+                themeLight.classList.remove('active');
+            });
+
+            themeLight.addEventListener('click', () => {
+                body.classList.add('white-theme');
+                themeLight.classList.add('active');
+                themeDark.classList.remove('active');
+            });
+        })();
+    </script>
+</body>
+</html>
